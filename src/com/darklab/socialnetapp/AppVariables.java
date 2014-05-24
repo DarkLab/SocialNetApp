@@ -6,7 +6,7 @@ public class AppVariables {
 	private static AppVariables sAppVariables;
 	private Context mAppContext;
 	
-	private String mUserId, mPassword, mCurrentProfile;
+	private String mUserId, mPassword, mCurrentProvider, mCurrentIdentifier;
 	
 	private AppVariables(Context context){
 		mAppContext = context;
@@ -37,12 +37,24 @@ public class AppVariables {
 		mPassword = password;
 	}
 
-	public String getCurrentProfile() {
-		return mCurrentProfile;
+	public String getCurrentProvider() {
+		return mCurrentProvider;
 	}
 
-	public void setCurrentProfile(String currentProfile) {
-		mCurrentProfile = currentProfile;
+	public void setCurrentProvider(String currentProvider) {
+		mCurrentProvider = currentProvider;
+	}
+
+	public String getCurrentIdentifier() {
+		return mCurrentIdentifier;
+	}
+
+	public void setCurrentIdentifier(String currentIdentifier) {
+		mCurrentIdentifier = currentIdentifier;
+	}
+	
+	public String getCurrentProfile(){
+		return mCurrentProvider + "-" + mCurrentIdentifier;
 	}
 
 }

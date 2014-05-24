@@ -21,7 +21,7 @@ public class SocialNetAppFragment extends SocialNetBaseFragment implements
 
 	public static final String TAG = "SocialNetAppFragment";
 
-	Button btnRequestOne, btnRequestTwo, btnCreateEvent;
+	Button btnLogin, btnFindAll, btnCreateEvent;
 	TextView textViewMain;
 	EditText editTextIdentifier, editTextRant;
 	Spinner spinnerProviderName, spinnerFeeling;
@@ -43,8 +43,8 @@ public class SocialNetAppFragment extends SocialNetBaseFragment implements
 		spinnerProviderName = (Spinner) v.findViewById(id.spinnerProviderName);
 		initializeSpinner(spinnerProviderName, R.array.provider_name);
 
-		btnRequestOne = (Button) v.findViewById(id.btnRequestOne);
-		btnRequestOne.setOnClickListener(new OnClickListener() {
+		btnLogin = (Button) v.findViewById(id.btnRequestOne);
+		btnLogin.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
@@ -52,8 +52,9 @@ public class SocialNetAppFragment extends SocialNetBaseFragment implements
 				TextView view = (TextView) spinnerProviderName
 						.getSelectedView();
 				String provider = view.getText().toString();
-				AppVariables.get(getActivity()).setCurrentProfile(
-						provider + "-" + identifier);
+				AppVariables.get(getActivity())
+						.setCurrentIdentifier(identifier);
+				AppVariables.get(getActivity()).setCurrentProvider(provider);
 				if (isValid(provider) && isValid(identifier)) {
 					RequestMaker.loginWithSocialId(getActivity(),
 							SocialNetAppFragment.this, provider, identifier);
@@ -66,8 +67,8 @@ public class SocialNetAppFragment extends SocialNetBaseFragment implements
 			}
 		});
 
-		btnRequestTwo = (Button) v.findViewById(id.btnRequestTwo);
-		btnRequestTwo.setOnClickListener(new OnClickListener() {
+		btnFindAll = (Button) v.findViewById(id.btnRequestTwo);
+		btnFindAll.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
@@ -97,8 +98,10 @@ public class SocialNetAppFragment extends SocialNetBaseFragment implements
 				if (isValid(provider) && isValid(identifier)
 						&& isValid(feeling)) {
 					RequestMaker.createEvent(getActivity(),
-							SocialNetAppFragment.this, "FB", "54321", provider,
-							identifier, feeling, rant, null, null);
+							SocialNetAppFragment.this,
+							AppVariables.get(getActivity()).getCurrentProvider(),
+							AppVariables.get(getActivity()).getCurrentIdentifier(), 
+							provider, identifier, feeling, rant, null, null);
 
 				} else {
 					Toast.makeText(getActivity(),
@@ -130,8 +133,12 @@ public class SocialNetAppFragment extends SocialNetBaseFragment implements
 						.getUserId(new JSONObject(responce));
 				AppVariables.get(getActivity()).setUserId(stringUserId);
 				AppVariables.get(getActivity()).setPassword("password");
-				string = "Login with userId: " + stringUserId + ", profile: "
-						+ AppVariables.get(getActivity()).getCurrentProfile();
+				string = new StringBuilder()
+						.append("Login with userId: ")
+						.append(AppVariables.get(getActivity()).getUserId())
+						.append(", profile: ")
+						.append(AppVariables.get(getActivity()).getCurrentProfile())
+						.toString();
 			} else if (request.getType().equals(HttpRequest.Type.FindAllUsers)) {
 				string = "Find - " + responce;
 			} else if (request.getType().equals(HttpRequest.Type.CreateEvent)) {

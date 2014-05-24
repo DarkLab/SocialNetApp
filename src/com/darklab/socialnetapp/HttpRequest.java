@@ -85,6 +85,16 @@ public class HttpRequest {
 			String targetSn, String targetSnId, String feeling) {
 		createEvent(mySn, mySnId, targetSn, targetSnId, feeling, null, null, null);
 	}
+	
+	public void createEvent(String mySn, String mySnId,
+			String targetSn, String targetSnId, String feeling, String rant) {
+		createEvent(mySn, mySnId, targetSn, targetSnId, feeling, rant, null, null);
+	}
+	
+	public void createEvent(String mySn, String mySnId,
+			String targetSn, String targetSnId, String feeling, String lat, String lon) {
+		createEvent(mySn, mySnId, targetSn, targetSnId, feeling, null, lat, lon);
+	}
 
 	public void createEvent(String mySn, String mySnId,
 			String targetSn, String targetSnId, String feeling, String rant, String lat, String lon) {
