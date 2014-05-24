@@ -5,6 +5,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import android.content.Context;
 import android.net.Uri;
 import android.net.Uri.Builder;
 import android.os.AsyncTask;
@@ -29,10 +30,13 @@ public class HttpRequest {
 	public static final String TEST0 = BASE_URL + "test0";
 	public static final String LOGIN_WITH_SOCIAL_ID = BASE_URL + "loginWithSocialId";
 	public static final String FIND_ALL_USERS = BASE_URL + "findAllUsers";
+	public static final String CREATE_EVENT = BASE_URL + "createEvent";
 	
-	String userUUID = "5599c2ce-4a28-4926-b64c-57bda840618f";
-
-	String userPassword = "password";
+	private Context mAppContext;
+	
+	public HttpRequest(Context c){
+		mAppContext = c;
+	}
 	
 	ResponceListener mListener;
 	Type type;
@@ -79,18 +83,26 @@ public class HttpRequest {
 
 	public void createEvent(String mySn, String mySnId,
 			String targetSn, String targetSnId, String feeling) {
-		createEvent(mySn, mySnId, targetSn, targetSnId, feeling, null);
+		createEvent(mySn, mySnId, targetSn, targetSnId, feeling, null, null, null);
 	}
 
 	public void createEvent(String mySn, String mySnId,
-			String targetSn, String targetSnId, String feeling, String rant) {
-		StringBuilder builder = new StringBuilder();
-		builder.append("Event: ").append(feeling).append(" => ")
-				.append(targetSn).append("-").append(targetSnId);
-		if (rant != null && !rant.trim().equals("")) {
-			builder.append(", message:").append(rant);
+			String targetSn, String targetSnId, String feeling, String rant, String lat, String lon) {
+		Builder builder = Uri.parse(CREATE_EVENT).buildUpon()
+				.appendQueryParameter("mySn", mySn)
+				.appendQueryParameter("mySnId", mySnId)
+				.appendQueryParameter("targetSn", targetSn)
+				.appendQueryParameter("targetSnId", targetSnId)
+				.appendQueryParameter("feeling", feeling);
+		if (rant != null) {
+			builder.appendQueryParameter("rant", rant);
 		}
-		Log.i(TAG, builder.toString());
+		if (lat != null && lon != null) {
+			builder.appendQueryParameter("lat", lat)
+			.appendQueryParameter("lon", lon);
+		}
+		String url = builder.build().toString();
+		new RequestMakerTask().execute(url, METHOD_POST);
 	}
 	
 	public void onPostRequest(String responce){
@@ -98,7 +110,7 @@ public class HttpRequest {
 		if (mListener != null) {
 			data = responce;
 		}else{
-			data = "listener = null";
+			data = "{\"error\":{\"message\":\"No listener\"}}";
 		}
 		mListener.onResponceReceived(data, this);
 	}
@@ -164,13 +176,11 @@ public class HttpRequest {
 		}
 
 		private String getUserPassword() {
-
-			return userPassword;
+			return AppVariables.get(mAppContext).getPassword();
 		}
 
 		private String getUserUUID() {
-			
-			return userUUID;
+			return AppVariables.get(mAppContext).getUserId();
 		}
 
 	}

@@ -1,5 +1,7 @@
 package com.darklab.socialnetapp;
 
+import org.json.JSONObject;
+
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -50,9 +52,11 @@ public class SocialNetAppFragment extends SocialNetBaseFragment implements
 				TextView view = (TextView) spinnerProviderName
 						.getSelectedView();
 				String provider = view.getText().toString();
+				AppVariables.get(getActivity()).setCurrentProfile(
+						provider + "-" + identifier);
 				if (isValid(provider) && isValid(identifier)) {
-					RequestMaker.loginWithSocialId(SocialNetAppFragment.this,
-							provider, identifier);
+					RequestMaker.loginWithSocialId(getActivity(),
+							SocialNetAppFragment.this, provider, identifier);
 				} else {
 					Toast.makeText(getActivity(),
 							"Check Provider and Identifier", Toast.LENGTH_LONG)
@@ -67,7 +71,8 @@ public class SocialNetAppFragment extends SocialNetBaseFragment implements
 
 			@Override
 			public void onClick(View v) {
-				RequestMaker.findAllUsers(SocialNetAppFragment.this);
+				RequestMaker.findAllUsers(getActivity(),
+						SocialNetAppFragment.this);
 
 			}
 		});
@@ -91,8 +96,9 @@ public class SocialNetAppFragment extends SocialNetBaseFragment implements
 				String rant = editTextRant.getText().toString();
 				if (isValid(provider) && isValid(identifier)
 						&& isValid(feeling)) {
-					RequestMaker.createEvent(SocialNetAppFragment.this, null,
-							null, provider, identifier, feeling, rant);
+					RequestMaker.createEvent(getActivity(),
+							SocialNetAppFragment.this, "FB", "54321", provider,
+							identifier, feeling, rant, null, null);
 
 				} else {
 					Toast.makeText(getActivity(),
@@ -117,15 +123,26 @@ public class SocialNetAppFragment extends SocialNetBaseFragment implements
 	@Override
 	public void onResponceReceived(String responce, HttpRequest request) {
 		String string = "";
-		if (request.getType().equals(HttpRequest.Type.LoginWithSocialId)) {
-			string = "Login - ";
-		} else if (request.getType().equals(HttpRequest.Type.FindAllUsers)){
-			string = "Find - ";
-		} else if (request.getType().equals(HttpRequest.Type.CreateEvent)){
-			string = "Create - ";
+		try {
+			if (request.getType().equals(HttpRequest.Type.LoginWithSocialId)) {
+				AppJSONSerializer helper = new AppJSONSerializer();
+				String stringUserId = helper
+						.getUserId(new JSONObject(responce));
+				AppVariables.get(getActivity()).setUserId(stringUserId);
+				AppVariables.get(getActivity()).setPassword("password");
+				string = "Login with userId: " + stringUserId + ", profile: "
+						+ AppVariables.get(getActivity()).getCurrentProfile();
+			} else if (request.getType().equals(HttpRequest.Type.FindAllUsers)) {
+				string = "Find - " + responce;
+			} else if (request.getType().equals(HttpRequest.Type.CreateEvent)) {
+				string = "Create - " + responce;
+			}
+		} catch (Exception e) {
+			string = e.getMessage();
 		}
-		logResult(string + responce);
-		textViewMain.setText(string + responce);
+
+		logResult(string);
+		textViewMain.setText(string);
 
 	}
 

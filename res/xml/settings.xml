@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory
+        android:key="pref_key_storage_settings"
+        android:title="@string/pref_storage_title" >
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="pref_key_use_icloud"
+            android:summary="pref_summary_use_icloud"
+            android:title="@string/pref_title_use_icloud" />
+    </PreferenceCategory>
+
+</PreferenceScreen>
