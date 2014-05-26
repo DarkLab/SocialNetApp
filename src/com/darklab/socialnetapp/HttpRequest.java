@@ -1,9 +1,20 @@
 package com.darklab.socialnetapp;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Formatter;
+import java.util.Locale;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpParams;
 
 import android.content.Context;
 import android.net.Uri;
@@ -16,7 +27,8 @@ public class HttpRequest {
 	public enum Type{
 		LoginWithSocialId,
 		CreateEvent,
-		FindAllUsers
+		FindAllUsers,
+		FindEvents
 	}
 	
 	public static final String TAG = "HttpRequest";
@@ -31,11 +43,14 @@ public class HttpRequest {
 	public static final String LOGIN_WITH_SOCIAL_ID = BASE_URL + "loginWithSocialId";
 	public static final String FIND_ALL_USERS = BASE_URL + "findAllUsers";
 	public static final String CREATE_EVENT = BASE_URL + "createEvent";
+	public static final String FIND_EVENTS = BASE_URL + "findEvents";
 	
 	private Context mAppContext;
+	private Formatter mFormatter;
 	
 	public HttpRequest(Context c){
 		mAppContext = c;
+		mFormatter = new Formatter(Locale.US);
 	}
 	
 	ResponceListener mListener;
@@ -92,12 +107,12 @@ public class HttpRequest {
 	}
 	
 	public void createEvent(String mySn, String mySnId,
-			String targetSn, String targetSnId, String feeling, String lat, String lon) {
+			String targetSn, String targetSnId, String feeling, Double lat, Double lon) {
 		createEvent(mySn, mySnId, targetSn, targetSnId, feeling, null, lat, lon);
 	}
 
 	public void createEvent(String mySn, String mySnId,
-			String targetSn, String targetSnId, String feeling, String rant, String lat, String lon) {
+			String targetSn, String targetSnId, String feeling, String rant, Double lat, Double lon) {
 		Builder builder = Uri.parse(CREATE_EVENT).buildUpon()
 				.appendQueryParameter("mySn", mySn)
 				.appendQueryParameter("mySnId", mySnId)
@@ -108,11 +123,44 @@ public class HttpRequest {
 			builder.appendQueryParameter("rant", rant);
 		}
 		if (lat != null && lon != null) {
-			builder.appendQueryParameter("lat", lat)
-			.appendQueryParameter("lon", lon);
+			String str = mFormatter.format("%f", lat).toString();
+			builder.appendQueryParameter("lat", mFormatter.format("%f", lat).toString())
+			.appendQueryParameter("lon", mFormatter.format("%f", lon).toString());
 		}
 		String url = builder.build().toString();
 		new RequestMakerTask().execute(url, METHOD_POST);
+	}
+	
+	public void findEvents(Double lat, Double lon){
+		findEvents(lat, lon, null);
+	}
+	
+	public void findEvents(Double lat, Double lon, Double dist){
+//		HttpClient client = new DefaultHttpClient();
+//		HttpParams params = new BasicHttpParams();
+//		params.setDoubleParameter("lat", lat);
+//		params.setDoubleParameter("lon", lon);
+//		params.setDoubleParameter("dist", dist);
+//		HttpPost post = new HttpPost(FIND_EVENTS);
+//		post.setParams(params);
+//		try {
+//			HttpResponse responsePost = client.execute(post);
+//		} catch (ClientProtocolException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+		
+		Builder builder = Uri.parse(FIND_EVENTS).buildUpon()
+				.appendQueryParameter("lat", String.valueOf(lat))
+				.appendQueryParameter("lon", String.valueOf(lon));
+		if (dist!= null) {
+			builder.appendQueryParameter("dist", String.valueOf(dist));
+		}
+		String url = builder.build().toString();
+		new RequestMakerTask().execute(url, METHOD_GET);
 	}
 	
 	public void onPostRequest(String responce){
@@ -122,7 +170,7 @@ public class HttpRequest {
 		}else{
 			data = "{\"error\":{\"message\":\"No listener\"}}";
 		}
-		mListener.onResponceReceived(data, this);
+		mListener.onResponseReceived(data, this);
 	}
 
 	public class RequestMakerTask extends AsyncTask<String, Void, String> {

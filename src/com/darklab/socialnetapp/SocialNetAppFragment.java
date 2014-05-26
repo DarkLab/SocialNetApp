@@ -21,7 +21,7 @@ public class SocialNetAppFragment extends SocialNetBaseFragment implements
 
 	public static final String TAG = "SocialNetAppFragment";
 
-	Button btnLogin, btnFindAll, btnCreateEvent;
+	Button btnLogin, btnFindAll, btnCreateEvent, btnFindEvents;
 	TextView textViewMain;
 	EditText editTextIdentifier, editTextRant;
 	Spinner spinnerProviderName, spinnerFeeling;
@@ -99,15 +99,30 @@ public class SocialNetAppFragment extends SocialNetBaseFragment implements
 						&& isValid(feeling)) {
 					RequestMaker.createEvent(getActivity(),
 							SocialNetAppFragment.this,
-							AppVariables.get(getActivity()).getCurrentProvider(),
-							AppVariables.get(getActivity()).getCurrentIdentifier(), 
-							provider, identifier, feeling, rant, null, null);
+							AppVariables.get(getActivity())
+									.getCurrentProvider(),
+							AppVariables.get(getActivity())
+									.getCurrentIdentifier(), provider,
+							identifier, feeling, "Wow! Ура!", 
+							45.089035, 
+							35.445328);
 
 				} else {
 					Toast.makeText(getActivity(),
 							"Check Provider, Identifier, Feeling",
 							Toast.LENGTH_LONG).show();
 				}
+
+			}
+		});
+
+		btnFindEvents = (Button) v.findViewById(id.btnFindEvents);
+		btnFindEvents.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				RequestMaker.findEvents(getActivity(),
+						SocialNetAppFragment.this, 45.038596, 35.386963, 50.0);
 
 			}
 		});
@@ -124,25 +139,27 @@ public class SocialNetAppFragment extends SocialNetBaseFragment implements
 	}
 
 	@Override
-	public void onResponceReceived(String responce, HttpRequest request) {
+	public void onResponseReceived(String response, HttpRequest request) {
 		String string = "";
 		try {
 			if (request.getType().equals(HttpRequest.Type.LoginWithSocialId)) {
 				AppJSONSerializer helper = new AppJSONSerializer();
 				String stringUserId = helper
-						.getUserId(new JSONObject(responce));
+						.getUserId(new JSONObject(response));
 				AppVariables.get(getActivity()).setUserId(stringUserId);
 				AppVariables.get(getActivity()).setPassword("password");
 				string = new StringBuilder()
 						.append("Login with userId: ")
 						.append(AppVariables.get(getActivity()).getUserId())
 						.append(", profile: ")
-						.append(AppVariables.get(getActivity()).getCurrentProfile())
-						.toString();
+						.append(AppVariables.get(getActivity())
+								.getCurrentProfile()).toString();
 			} else if (request.getType().equals(HttpRequest.Type.FindAllUsers)) {
-				string = "Find - " + responce;
+				string = "Find - " + response;
 			} else if (request.getType().equals(HttpRequest.Type.CreateEvent)) {
-				string = "Create - " + responce;
+				string = "Create - " + response;
+			} else if (request.getType().equals(HttpRequest.Type.FindEvents)) {
+				string = "Events - " + response;
 			}
 		} catch (Exception e) {
 			string = e.getMessage();

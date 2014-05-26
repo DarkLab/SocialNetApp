@@ -5,8 +5,8 @@ import android.content.Context;
 public class RequestMaker {
 	private static final String TAG = "RequestMaker";
 
-	public static void loginWithSocialId(Context c, ResponceListener listener, String sn,
-			String snid) {
+	public static void loginWithSocialId(Context c, ResponceListener listener,
+			String sn, String snid) {
 		HttpRequest request = new HttpRequest(c);
 		request.setListener(listener);
 		request.setType(HttpRequest.Type.LoginWithSocialId);
@@ -20,14 +20,22 @@ public class RequestMaker {
 		request.findAllUsers();
 	}
 
-	public static void createEvent(Context c, ResponceListener listener, String mySn,
-			String mySnId, String targetSn, String targetSnId, String feeling,
-			String rant, String lat, String lon) {
+	public static void createEvent(Context c, ResponceListener listener,
+			String mySn, String mySnId, String targetSn, String targetSnId,
+			String feeling, String rant, Double lat, Double lon) {
 		HttpRequest request = new HttpRequest(c);
 		request.setListener(listener);
 		request.setType(HttpRequest.Type.CreateEvent);
 		request.createEvent(mySn, mySnId, targetSn, targetSnId, feeling, rant,
 				lat, lon);
+	}
+
+	public static void findEvents(Context c, ResponceListener listener,
+			Double lat, Double lon, Double dist) {
+		HttpRequest request = new HttpRequest(c);
+		request.setListener(listener);
+		request.setType(HttpRequest.Type.FindEvents);
+		request.findEvents(lat, lon, dist);
 	}
 
 }
